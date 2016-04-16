@@ -21,6 +21,20 @@ Consider the following URL/Response body pairs as tests:
 
 """
 
+def positive(*args):
+    """
+    Should return the string true if the first arg is positive
+    Otherweise false
+    """
+    return 'true' if int(args[0])>0 else 'false'
+
+def negative(*args):
+    """
+    Should return string true if first arg is negative
+    Otherweise false
+    """
+    return 'true' if int(args[0])<0 else 'false'
+
 def resolve_path(path):
     """
     Should return two values: a callable and an iterable of
@@ -31,8 +45,17 @@ def resolve_path(path):
     # examples provide the correct *syntax*, but you should
     # determine the actual values of func and args using the
     # path.
-    func = some_func
-    args = ['25', '32']
+
+    #recommend to use strip instead of regex
+    args = path.strip("/").split("/")
+
+    func_name = args.pop(0)
+
+    #calls either positive or negative function
+    func = {
+        "positive": postive,
+        "negative": negative,
+    }.get(func_name)
 
     return func, args
 

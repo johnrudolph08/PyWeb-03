@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import datetime
+import os
+import sys
 
 default = "No Value Set"
 
@@ -14,6 +16,7 @@ body = """<html>
 </body>
 </html>"""
 
+date = datetime.date.today()
 
 def application(environ, start_response):
     import pprint
@@ -21,10 +24,10 @@ def application(environ, start_response):
 
     response_body = body.format(
         software=environ.get('SERVER_SOFTWARE', default),
-        path="aaaa",
-        month="bbbb",
-        date="cccc",
-        year="dddd",
+        path=os.path.dirname(os.path.realpath(sys.argv[0])),
+        month=date.month,
+        date=date,
+        year=date.year,
         client_ip="eeee"
     )
     status = '200 OK'

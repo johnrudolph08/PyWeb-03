@@ -27,6 +27,6 @@ body = """<html>
     month='bbbb',
     date='cccc',
     year='dddd',
-    client_ip='eeee'
+    client_ip=os.environ.get('REMOTE_ADDR', default)
 )
 print(body)
