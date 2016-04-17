@@ -54,15 +54,10 @@ def home_page():
       <tr><th>Divide: localhost/divide/4/2=2</td></tr>"""
   return page
 
-def convert_args_to_int(args):
-  """Function creates a list of integers given a list of string type integers"""
-  int_args = [float(arg) for arg in args]
-  start = int_args.pop(0)
-  return start, int_args
-
 def operation(math_func, *args):
   """Perform an operation on each item in list"""  
-  start, int_args = convert_args_to_int(args)
+  int_args = [float(arg) for arg in args]
+  start = int_args.pop(0)
   for n in int_args:
     start = math_func(start,n)
   return str(start)
