@@ -41,25 +41,74 @@ To submit your homework:
 
 
 """
-from functools import reduce
+def home_page():
+  page = """
+      <h1>In Browser Calculator Instructions</h1>
+      <h2>The following operations are supported:</h2>
+      <table>
+      <tr><th>Add: EX: localhost/add/4/2=6</td></tr>
+      <tr><th>Subtract: EX: localhost/subtract/4/2=2</td></tr>
+      <tr><th>Multiply: localhost/multiply/4/2=8</td></tr>
+      <tr><th>Divide: localhost/divide/4/2=2</td></tr>"""
+  return page
+
 
 def convert_args_to_int(args):
   """Function creates a list of integers given a list of string type integers"""
-  int_args = [int(arg) for arg in args]
-
-  return int_args
+  int_args = [float(arg) for arg in args]
+  start = int_args.pop(0)
+  return start, int_args
+  
 
 def add(*args):
-  return str(reduce(lambda x,y: x+y, convert_args_to_int(args)))
+  """Add each integer in a list"""
+  try:
+    start, int_args = convert_args_to_int(args)
+    for n in int_args:
+      start += n
+  except ValueError:
+    raise
+
+  return str(start)
 
 def subtract(*args):
-  return str(reduce(lambda x,y: x-y, convert_args_to_int(args)))
+  """Subtract each integer in a list"""
+  try:
+    total=float(args[0])*2
+    for n in convert_args_to_int(args):
+      total -= n
+  except ValueError:
+    raise
+
+  return str(total)
 
 def multiply(*args):
-  return str(reduce(lambda x,y: x*y, convert_args_to_int(args)))
+  """Multiply each integer in a list"""
+  try:
+    total=1
+    for n in convert_args_to_int(args):
+      total *= n
+  except ValueError:
+    raise
+
+  return str(total)
 
 def divide(*args):
-  return str(reduce(lambda x,y: x/y, convert_args_to_int(args)))
+  """Divide each integer in a list"""
+  try:
+    #if first arg is 0 then total will be 0
+    if float(args[0]) == 0:
+      total = 0
+    else:
+      total=float(args[0])**2
+      for n in convert_args_to_int(args):
+        total /= n
+  except ZeroDivisionError:
+    raise
+  except ValueError:
+    raise
+
+  return str(total)
 
 def resolve_path(path):
     """
@@ -68,8 +117,7 @@ def resolve_path(path):
     """
     args = path.strip("/").split("/")
     func_name = args.pop(0)
-
-    #calls either positive or negative function
+    #dictionary to hold operation functions
     func = {
         'add': add,
         'subtract': subtract,
@@ -80,24 +128,35 @@ def resolve_path(path):
     return func, args
 
 def application(environ, start_response):
-    headers = [("Content-type", "text/html")]
+    headers = [('Content-type', 'text/html')]
     try:
         path = environ.get('PATH_INFO', None)
         if path is None:
             raise NameError
         func, args = resolve_path(path)
-        body = func(*args)
+        if None in (func, args):
+          body = home_page()
+        else:
+          body = func(*args)
         status = "200 OK"
     except NameError:
-      status = "404 Not Found"
-      body = "<h1>Not Found</h1>"
+        status = "404 Not Found"
+        body = "<h1>Not Found</h1>"
+    except ZeroDivisionError:
+        #will raise if user requests a number divided by 0
+        status = "500 Internal Server Error"
+        body = "<h1> Can't Divide by Zero </h1>"
+    except ValueError:
+        #will raise if user inputs a non-numeric value
+        status = "500 Internal Server Error"
+        body = "<h1> Can't Perform Operations on Non Numeric Inputs </h1>"
     except Exception:
-      status = "500 Internal Server Error"
-      body = "<h1>Internal Server Error</h1>"
+        status = "500 Internal Server Error"
+        body = "<h1> Internal Server Error</h1>"
     finally:
-      headers.append(('Content-length', str(len(body))))
-      start_response(status, headers)
-      return [body.encode('utf8')]
+        headers.append(('Content-length', str(len(body))))
+        start_response(status, headers)
+        return [body.encode('utf8')]
 
 if __name__ == '__main__':
     # DONE: Insert boilerplate wsgiref

@@ -51,11 +51,9 @@ def books():
 def application(environ, start_response):
     headers = [("Content-type", "text/html")]
     try:
-    	path = environ.get('PATH_INFO', None)
-    	
+    	path = environ.get('PATH_INFO', None)    	
     	if path is None:
     		raise NameError
-
     	func, args = resolve_path(path)
     	body = func(*args)
     	status = "200 OK"
