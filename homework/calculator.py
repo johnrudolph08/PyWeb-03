@@ -41,6 +41,8 @@ To submit your homework:
 
 
 """
+import operator
+
 def home_page():
   page = """
       <h1>In Browser Calculator Instructions</h1>
@@ -52,56 +54,17 @@ def home_page():
       <tr><th>Divide: localhost/divide/4/2=2</td></tr>"""
   return page
 
-
 def convert_args_to_int(args):
   """Function creates a list of integers given a list of string type integers"""
   int_args = [float(arg) for arg in args]
   start = int_args.pop(0)
   return start, int_args
 
-
-def add(*args):
-  """Add each integer in a list"""
-  try:
-    start, int_args = convert_args_to_int(args)
-    for n in int_args:
-      start += n
-  except ValueError:
-    raise
-
-  return str(start)
-
-def subtract(*args):
-  """Subtract each integer in a list"""
-  try:
-    start, int_args = convert_args_to_int(args)
-    for n in int_args:
-      start -= n
-  except ValueError:
-    raise
-
-  return str(start)
-
-def multiply(*args):
-  """Multiply each integer in a list"""
-  try:
-    start, int_args = convert_args_to_int(args)
-    for n in int_args:
-      start *= n
-  except ValueError:
-    raise
-
-  return str(start)
-
-def divide(*args):
-  """Divide each integer in a list"""
-  try:
-    start, int_args = convert_args_to_int(args)
-    for n in int_args:
-      start /= n
-  except ValueError:
-    raise
-
+def operation(math_func, *args):
+  """Perform an operation on each item in list"""  
+  start, int_args = convert_args_to_int(args)
+  for n in int_args:
+    start = math_func(start,n)
   return str(start)
 
 def resolve_path(path):
@@ -113,12 +76,11 @@ def resolve_path(path):
     func_name = args.pop(0)
     #dictionary to hold operation functions
     func = {
-        'add': add,
-        'subtract': subtract,
-        'multiply': multiply,
-        'divide': divide,
+        'add': operator.iadd,
+        'subtract': operator.isub,
+        'multiply': operator.imul,
+        'divide': operator.itruediv,
     }.get(func_name)
-
     return func, args
 
 def application(environ, start_response):
@@ -131,7 +93,7 @@ def application(environ, start_response):
         if None in (func, args):
           body = home_page()
         else:
-          body = func(*args)
+          body = operation(func, *args)
         status = "200 OK"
     except NameError:
         status = "404 Not Found"
