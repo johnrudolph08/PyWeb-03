@@ -41,45 +41,66 @@ To submit your homework:
 
 
 """
+from functools import reduce
 
+def convert_args_to_int(args):
+  """Function creates a list of integers given a list of string type integers"""
+  int_args = [int(arg) for arg in args]
+
+  return int_args
 
 def add(*args):
-    """ Returns a STRING with the sum of the arguments """
+  return str(reduce(lambda x,y: x+y, convert_args_to_int(args)))
 
-    # TODO: Fill sum with the correct value, based on the
-    # args provided.
-    sum = "0"
+def subtract(*args):
+  return str(reduce(lambda x,y: x-y, convert_args_to_int(args)))
 
-    return sum
+def multiply(*args):
+  return str(reduce(lambda x,y: x*y, convert_args_to_int(args)))
 
-# TODO: Add functions for handling more arithmetic operations.
+def divide(*args):
+  return str(reduce(lambda x,y: x/y, convert_args_to_int(args)))
 
 def resolve_path(path):
     """
     Should return two values: a callable and an iterable of
     arguments.
     """
+    args = path.strip("/").split("/")
+    func_name = args.pop(0)
 
-    # TODO: Provide correct values for func and args. The
-    # examples provide the correct *syntax*, but you should
-    # determine the actual values of func and args using the
-    # path.
-    func = add
-    args = ['25', '32']
+    #calls either positive or negative function
+    func = {
+        'add': add,
+        'subtract': subtract,
+        'multiply': multiply,
+        'divide': divide,
+    }.get(func_name)
 
     return func, args
 
 def application(environ, start_response):
-    # TODO: Your application code from the book database
-    # work here as well! Remember that your application must
-    # invoke start_response(status, headers) and also return
-    # the body of the response in BYTE encoding.
-    #
-    # TODO (bonus): Add error handling for a user attempting
-    # to divide by zero.
-    pass
+    headers = [("Content-type", "text/html")]
+    try:
+        path = environ.get('PATH_INFO', None)
+        if path is None:
+            raise NameError
+        func, args = resolve_path(path)
+        body = func(*args)
+        status = "200 OK"
+    except NameError:
+      status = "404 Not Found"
+      body = "<h1>Not Found</h1>"
+    except Exception:
+      status = "500 Internal Server Error"
+      body = "<h1>Internal Server Error</h1>"
+    finally:
+      headers.append(('Content-length', str(len(body))))
+      start_response(status, headers)
+      return [body.encode('utf8')]
 
 if __name__ == '__main__':
-    # TODO: Insert the same boilerplate wsgiref simple
-    # server creation that you used in the book database.
-    pass
+    # DONE: Insert boilerplate wsgiref
+    from wsgiref.simple_server import make_server
+    srv = make_server('localhost', 8080, application)
+    srv.serve_forever()
