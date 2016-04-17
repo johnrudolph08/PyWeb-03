@@ -58,7 +58,7 @@ def convert_args_to_int(args):
   int_args = [float(arg) for arg in args]
   start = int_args.pop(0)
   return start, int_args
-  
+
 
 def add(*args):
   """Add each integer in a list"""
@@ -74,41 +74,35 @@ def add(*args):
 def subtract(*args):
   """Subtract each integer in a list"""
   try:
-    total=float(args[0])*2
-    for n in convert_args_to_int(args):
-      total -= n
+    start, int_args = convert_args_to_int(args)
+    for n in int_args:
+      start -= n
   except ValueError:
     raise
 
-  return str(total)
+  return str(start)
 
 def multiply(*args):
   """Multiply each integer in a list"""
   try:
-    total=1
-    for n in convert_args_to_int(args):
-      total *= n
+    start, int_args = convert_args_to_int(args)
+    for n in int_args:
+      start *= n
   except ValueError:
     raise
 
-  return str(total)
+  return str(start)
 
 def divide(*args):
   """Divide each integer in a list"""
   try:
-    #if first arg is 0 then total will be 0
-    if float(args[0]) == 0:
-      total = 0
-    else:
-      total=float(args[0])**2
-      for n in convert_args_to_int(args):
-        total /= n
-  except ZeroDivisionError:
-    raise
+    start, int_args = convert_args_to_int(args)
+    for n in int_args:
+      start /= n
   except ValueError:
     raise
 
-  return str(total)
+  return str(start)
 
 def resolve_path(path):
     """
