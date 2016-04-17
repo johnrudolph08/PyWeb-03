@@ -1,57 +1,15 @@
-"""
-For your homework this week, you'll be creating a wsgi application of
-your own.
-
-You'll create an online calculator that can perform several operations.
-
-You'll need to support:
-
-  * Addition
-  * Subtractions
-  * Multiplication
-  * Division
-
-Your users should be able to send appropriate requests and get back
-proper responses. For example, if I open a browser to your wsgi
-application at `http://localhost:8080/multiple/3/5' then the response
-body in my browser should be `15`.
-
-Consider the following URL/Response body pairs as tests:
-
-```
-  http://localhost:8080/multiply/3/5   => 15
-  http://localhost:8080/add/23/42      => 65
-  http://localhost:8080/subtract/23/42 => -19
-  http://localhost:8080/divide/22/11   => 2
-  http://localhost:8080/divide/6/0     => HTTP "400 Bad Request"
-  http://localhost:8080/               => <html>Here's how to use this page...</html>
-```
-
-To submit your homework:
-
-  * Fork this repository (Session03).
-  * Edit this file to meet the homework requirements.
-  * Your script should be runnable using `$ python calculator.py`
-  * When the script is running, I should be able to view your
-    application in my browser.
-  * I should also be able to see a home page (http://localhost:8080/)
-    that explains how to perform calculations.
-  * Commit and push your changes to your fork.
-  * Submit a link to your Session03 fork repository!
-
-
-"""
 import operator
 
 def home_page():
+  """"Home page with instructions to use calculator"""
   page = """
       <h1>In Browser Calculator Instructions</h1>
       <h2>The following operations are supported:</h2>
       <table>
-      <tr><th>Add: EX: localhost/add/4/2=6</td></tr>
-      <tr><th>Subtract: EX: localhost/subtract/4/2=2</td></tr>
-      <tr><th>Multiply: localhost/multiply/4/2=8</td></tr>
-      <tr><th>Divide: localhost/divide/4/2=2</td></tr>"""
+      <tr><th>Add: EX: localhost/add/4/2 will return 6</td></tr>
+      <tr><th>Subtract: EX: localhost/subtract/4/2 will return 2</td></tr>
+      <tr><th>Multiply: EX: localhost/multiply/4/2 will return 8</td></tr>
+      <tr><th>Divide: EX: localhost/divide/4/2 will return 2</td></tr>"""
   return page
 
 def operation(math_func, *args):
@@ -63,13 +21,10 @@ def operation(math_func, *args):
   return str(start)
 
 def resolve_path(path):
-    """
-    Should return two values: a callable and an iterable of
-    arguments.
-    """
+    """Parses request to return a mathemamtical operation and numeric variables"""
     args = path.strip("/").split("/")
     func_name = args.pop(0)
-    #dictionary to hold operation functions
+    #dictionary to hold supported operations
     func = {
         'add': operator.iadd,
         'subtract': operator.isub,
@@ -85,8 +40,10 @@ def application(environ, start_response):
         if path is None:
             raise NameError
         func, args = resolve_path(path)
+        #if func and args are blank then no operation was selected - return homepage
         if None in (func, args):
           body = home_page()
+        #else pass operaton and args and return result
         else:
           body = operation(func, *args)
         status = "200 OK"
@@ -110,7 +67,7 @@ def application(environ, start_response):
         return [body.encode('utf8')]
 
 if __name__ == '__main__':
-    # DONE: Insert boilerplate wsgiref
+    #Inserted boilerplate wsgiref
     from wsgiref.simple_server import make_server
     srv = make_server('localhost', 8080, application)
     srv.serve_forever()
